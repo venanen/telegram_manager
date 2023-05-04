@@ -52,7 +52,7 @@ const CONFIG_CHANNELS = [
 ]
 
 
-const core = new Core(VK_TOKEN, TELEGRAM_BOT_TOKEN, CONFIG_CHANNELS)
+const core = new Core(VK_TOKEN, TELEGRAM_BOT_TOKEN, GLOBAL_SMM_TOKEN, CONFIG_CHANNELS)
 const smm = new SMM(GLOBAL_SMM_TOKEN)
 const args = process.argv
 if(args[2] === 'get'){
@@ -63,4 +63,7 @@ if(args[2] === 'post'){
 }
 if(args[2] === 'up-views'){
     smm.processPostLinksJSON('./posts_links.json')
+}
+if(args[2] === 'set-ads'){
+    core.processSelfAd()
 }

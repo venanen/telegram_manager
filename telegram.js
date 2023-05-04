@@ -10,7 +10,7 @@ class Telegram {
         try {
             return await axios.post(`https://api.telegram.org/bot${this.token}/${method}`, params)
         } catch (e) {
-            console.error('Error with callMethod', e.response.data)
+            console.error('Error with callMethod', e.response.data, 'URL: ', `https://api.telegram.org/bot${this.token}/${method}`, params)
         }
     }
 
@@ -45,9 +45,10 @@ class Telegram {
         })
     }
     async getMemberCount(){
-        return this.callMethod('getChatMemberCount', {
+        const data = await this.callMethod('getChatMemberCount', {
             "chat_id": this.destinationChat,
         })
+        return data.data.result
     }
     async processVkPosts(posts) {
         let memberCount = await this.getMemberCount()
@@ -90,7 +91,7 @@ class Telegram {
         const resObject = {length, posts: otherPosts}
         this.saveMemeToJSON(channelIndex, resObject)
         const result = await this.processVkPosts(processPosts)
-        this.addPostLinksToJSON(channelIndex, result)
+        this.addPostLinksToJSON(result)
 
 
     }
@@ -100,10 +101,10 @@ class Telegram {
     saveMemeToJSON(channelIndex, resObject){
         fs.writeFileSync(`posts_channel_${channelIndex}.json`, JSON.stringify(resObject))
     }
-    savePostsLinks(channelIndex, resObject){
+    savePostsLinks(resObject){
         fs.writeFileSync(`posts_links.json`, JSON.stringify(resObject))
     }
-    readPostsLinks(channelIndex){
+    readPostsLinks(){
         if (fs.existsSync(`posts_links.json`)) {
             return JSON.parse(fs.readFileSync(`posts_links.json`, 'utf8'))
         }else{
@@ -111,10 +112,10 @@ class Telegram {
         }
 
     }
-    addPostLinksToJSON(channelIndex, resObject){
-        let res = this.readPostsLinks(channelIndex)
+    addPostLinksToJSON( resObject){
+        let res = this.readPostsLinks()
         console.log('resObj', resObject)
-        this.savePostsLinks(channelIndex, [...res, ...resObject])
+        this.savePostsLinks([...res, ...resObject])
     }
     sleep(ms) {
         return new Promise(r => setTimeout(r, ms));
