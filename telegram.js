@@ -81,17 +81,19 @@ class Telegram {
         return resultRequests
     }
 
-    async postPartGroup(channelIndex) {
+    async postPartGroup(channelIndex, limit = -1) {
         const {length, posts} = this.readMemeFromJSON(channelIndex)
-        const chunkSize = Math.floor((7 / 100) * length)
+        const chunkSize = Math.floor((25 / 100) * length)
         const sliceEnd = chunkSize > length ? length : chunkSize
-        const processPosts = posts.slice(0, sliceEnd)
-        const otherPosts = posts.slice(sliceEnd, posts.length - 1)
-        console.log('Proccess part, json len: ', length, 'real post: ', posts.length, ' process post: ', processPosts.length, ' other posts: ', otherPosts.length, ' slice end: ', sliceEnd)
+        const countProcessPosts = limit !== -1 && sliceEnd > limit ? limit : sliceEnd
+        const processPosts = posts.slice(0, countProcessPosts)
+        const otherPosts = posts.slice(countProcessPosts, posts.length - 1)
+        console.log('Proccess part, json len: ', length, 'real post: ', posts.length, ' process post: ', processPosts.length, ' other posts: ', otherPosts.length, ' slice end: ', countProcessPosts)
         const resObject = {length, posts: otherPosts}
         this.saveMemeToJSON(channelIndex, resObject)
-        const result = await this.processVkPosts(processPosts)
+        const result = await this.processVkPosts(processPosts, limit)
         this.addPostLinksToJSON(result)
+        return true
 
 
     }
@@ -114,11 +116,22 @@ class Telegram {
     }
     addPostLinksToJSON( resObject){
         let res = this.readPostsLinks()
-        console.log('resObj', resObject)
+        //console.log('resObj', resObject)
+/*        if(typeof resObject !== 'object'){
+            console.error('Error obj recivied', resObject)
+            throw new Error('resObject is not an object')
+        }*/
         this.savePostsLinks([...res, ...resObject])
     }
     sleep(ms) {
         return new Promise(r => setTimeout(r, ms));
     }
+
+    async getUpdates(){
+        let data = await this.callMethod('getUpdates', {})
+
+        return data.data
+    }
+
 }
 export default Telegram

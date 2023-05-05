@@ -21,8 +21,9 @@ class SMM{
 
     }
     async callSmmMethod(method, quantity, postLink){
-
+        console.log('callSmmMethod', method, quantity, postLink)
         const urlMethod = `https://global-smm.biz/api/adapter/default/index/?key=${this.token}&_format=json&action=add&service=${method}&quantity=${quantity}&link=${postLink}`
+        //const urlMethod = `https://echo.zuplo.io/`
         try {
         return await axios.get(urlMethod)
         } catch (e) {
